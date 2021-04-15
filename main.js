@@ -7,6 +7,7 @@ class Block {
     this.data = data;
     this.previousHash = previousHash;
     this.hash = this.calculateHash;
+    this.nonce = 0;
   }
 
   calculateHash() {
@@ -14,14 +15,28 @@ class Block {
       this.index +
         this.previousHash +
         this.timestamp +
-        JSON.stringify(this.data)
+        JSON.stringify(this.data) +
+        this.nonce
     ).toString();
+  }
+
+  mineBlock(difficulty) {
+    while (
+      String(this.hash).substring(0, difficulty) !==
+      Array(difficulty + 1).join("0")
+    ) {
+      this.nonce++;
+      this.hash = this.calculateHash();
+    }
+    //keep calculating hash untill you get has value where, num of zeroes upfront === difficulty
+    console.log("Block mined: " + this.hash);
   }
 }
 
 class BlockChain {
   constructor() {
     this.chain = [this.createGenesisBlock()];
+    this.difficulty = 4;
   }
 
   createGenesisBlock() {
@@ -34,7 +49,8 @@ class BlockChain {
 
   addBlock(newBlock) {
     newBlock.previousHash = this.getLatestBlock().hash;
-    newBlock.hash = newBlock.calculateHash();
+    //newBlock.hash = newBlock.calculateHash();
+    newBlock.mineBlock(this.difficulty);
     this.chain.push(newBlock);
   }
 
@@ -55,12 +71,18 @@ class BlockChain {
 }
 
 let grvCoin = new BlockChain();
+// grvCoin.addBlock(new Block(1, "02/04/2021", { amount: 4 }));
+// grvCoin.addBlock(new Block(2, "03/04/2021", { amount: 10 }));
+
+// console.log("Is BlockChain Valid? " + grvCoin.isChainValid());
+// console.log(JSON.stringify(grvCoin, null, 4));
+
+// grvCoin.chain[1].data = { amount: 100 };
+// grvCoin.chain[1].hash = grvCoin.chain[1].calculateHash();
+// console.log("Is BlockChain Valid? " + grvCoin.isChainValid());
+
+console.log("Mining block 1...");
 grvCoin.addBlock(new Block(1, "02/04/2021", { amount: 4 }));
+console.log("Mining block 2...");
 grvCoin.addBlock(new Block(2, "03/04/2021", { amount: 10 }));
-
-console.log("Is BlockChain Valid? " + grvCoin.isChainValid());
 console.log(JSON.stringify(grvCoin, null, 4));
-
-grvCoin.chain[1].data = { amount: 100 };
-grvCoin.chain[1].hash = grvCoin.chain[1].calculateHash();
-console.log("Is BlockChain Valid? " + grvCoin.isChainValid());
